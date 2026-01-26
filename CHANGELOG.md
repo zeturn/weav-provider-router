@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-25
+
+### Added
+
+#### Dynamic Model List Fetching
+- **9 Providers with Dynamic Fetching**: Automatic model list retrieval from provider APIs
+  - Mistral: `/v1/models` endpoint
+  - Groq: `/openai/v1/models` endpoint
+  - Together AI: `/v1/models` endpoint
+  - Moonshot: `/v1/models` endpoint
+  - ByteDance: Custom base_url + `/models` endpoint
+  - NVIDIA: `/v1/models` endpoint
+  - DeepSeek: `/v1/models` endpoint
+  - Qwen: `/compatible-mode/v1/models` endpoint
+  - Zhipu: `/api/paas/v4/models` endpoint
+- **Automatic Fallback**: Returns static default models on API failure
+- **10-second Timeout**: Prevents hanging requests
+- **Smart Error Handling**: Graceful degradation when API unavailable
+
+#### Universal base_url Support
+- **All 16 Providers**: Every LLM provider now supports custom `base_url`
+  - OpenAI, Anthropic, Google
+  - DeepSeek, Qwen, Zhipu, Moonshot
+  - Mistral, Groq, Together AI
+  - Cohere, Baidu, MiniMax
+  - ByteDance, NVIDIA, Ollama
+- **Use Cases**:
+  - Self-hosted models (local OpenAI-compatible servers)
+  - API proxies and load balancers
+  - Regional endpoints
+  - Testing with mock servers
+  - Corporate internal endpoints
+
+### Changed
+- **Simplified build_provider()**: Unified logic for all providers
+- **Enhanced Cohere**: Configurable base_url (default: `api.cohere.com/v1`)
+- **Enhanced Baidu**: Custom base_url for OAuth and chat endpoints
+- **Enhanced MiniMax**: Configurable base_url (default: `api.minimax.chat/v1`)
+
+### Documentation
+- Added "Custom Base URL" section with 5 usage examples
+- Documented dynamic model fetching behavior
+- Updated provider notes for all changes
+- Added comprehensive examples for custom endpoints
+
+### Technical Details
+- **Model List APIs**: 12/16 providers now fetch models dynamically
+  - Already implemented: OpenAI, Anthropic, Google, Ollama
+  - New additions: 9 providers (see above)
+  - Static lists: Baidu, Cohere, MiniMax (no public API)
+- **base_url Architecture**: Consistent parameter across all providers
+- **Backward Compatible**: All changes maintain existing API
+
 ## [0.2.0] - 2026-01-25
 
 ### Added
@@ -110,6 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MyPy type checking
 - Comprehensive documentation and examples
 
-[Unreleased]: https://github.com/zeturn/weav-provider-router/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/zeturn/weav-provider-router/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/zeturn/weav-provider-router/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zeturn/weav-provider-router/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/zeturn/weav-provider-router/releases/tag/v0.1.0
