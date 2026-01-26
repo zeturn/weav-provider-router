@@ -229,7 +229,7 @@ class TestErrorHandling:
 
     def test_chat_with_invalid_provider(self):
         """Test chat with invalid provider raises error."""
-        with pytest.raises(ValueError, match="Unsupported provider"):
+        with pytest.raises(ValueError, match="Unsupported LLM provider"):
             chat(
                 provider="invalid_provider",
                 api_key="test-key",

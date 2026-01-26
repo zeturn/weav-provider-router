@@ -80,13 +80,13 @@ class OpenAIChat(LLMBase):
     def list_models(self) -> list[str]:
         """从OpenAI API获取可用模型列表（仅使用显式传入或默认 base_url）。"""
         api_key = self._api_key
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is required")
         base_url = self._base_url or "https://api.openai.com/v1"
         base_url = base_url.rstrip("/")
         if not base_url.endswith("/v1"):
             base_url = f"{base_url}/v1"
         try:
-            if not api_key:
-                raise RuntimeError("OPENAI_API_KEY is required")
             url = f"{base_url}/models"
             req = urlrequest.Request(url, headers={"Authorization": f"Bearer {api_key}"})
             with urlrequest.urlopen(req, timeout=15) as resp:

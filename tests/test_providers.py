@@ -1,7 +1,7 @@
 """Unit tests for provider builder and registry."""
 
 import pytest
-from weav_provider_router.providers import build_provider, build_image_provider, build_embedding_provider, LLM_PROVIDER_CLASSES
+from weav_provider_router.providers import build_provider, build_image_provider, build_embedding_provider, LLM_PROVIDER_CLASSES, PROVIDER_CLASSES
 from weav_provider_router.adapters.openai import OpenAIChat
 from weav_provider_router.adapters.anthropic import AnthropicChat
 from weav_provider_router.adapters.google import GoogleChat
