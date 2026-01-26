@@ -111,31 +111,37 @@ class TestBuildProvider:
 
     def test_build_moonshot_provider(self):
         """Test building Moonshot provider."""
+        pytest.importorskip("openai", reason="openai not installed")
         provider = build_provider("moonshot", api_key="test-key")
         assert isinstance(provider, MoonshotChat)
 
     def test_build_baidu_provider(self):
         """Test building Baidu provider."""
+        pytest.importorskip("httpx", reason="httpx not installed")
         provider = build_provider("baidu", api_key="test-key", secret_key="test-secret")
         assert isinstance(provider, BaiduChat)
 
     def test_build_mistral_provider(self):
         """Test building Mistral provider."""
+        pytest.importorskip("openai", reason="openai not installed")
         provider = build_provider("mistral", api_key="test-key")
         assert isinstance(provider, MistralChat)
 
     def test_build_groq_provider(self):
         """Test building Groq provider."""
+        pytest.importorskip("openai", reason="openai not installed")
         provider = build_provider("groq", api_key="test-key")
         assert isinstance(provider, GroqChat)
 
     def test_build_together_provider(self):
         """Test building Together AI provider."""
+        pytest.importorskip("openai", reason="openai not installed")
         provider = build_provider("together", api_key="test-key")
         assert isinstance(provider, TogetherChat)
 
     def test_build_cohere_provider(self):
         """Test building Cohere provider."""
+        pytest.importorskip("httpx", reason="httpx not installed")
         provider = build_provider("cohere", api_key="test-key")
         assert isinstance(provider, CohereChat)
 
