@@ -63,13 +63,37 @@ class NVIDIAChat(LLMBase):
                 yield chunk.choices[0].delta.content
 
     def list_models(self) -> list[str]:
-        """List available NVIDIA NIM models."""
-        return [
+        """List available NVIDIA NIM models (dynamically fetched)."""
+        import json
+        from urllib import request as urlrequest
+        
+        default_models = [
             "nvidia/llama-3.1-nemotron-70b-instruct",
             "nvidia/llama-3.1-nemotron-51b-instruct",
             "meta/llama-3.1-405b-instruct",
             "meta/llama-3.1-70b-instruct",
             "meta/llama-3.1-8b-instruct",
-            "mistralai/mixtral-8x22b-instruct-v0.1",
             "mistralai/mixtral-8x7b-instruct-v0.1",
+            "mistralai/mixtral-8x22b-instruct-v0.1",
         ]
+        
+        if not self._client.api_key:
+            return default_models
+            
+        try:
+            url = "https://integrate.api.nvidia.com/v1/models"
+            req = urlrequest.Request(
+                url,
+                headers={"Authorization": f"Bearer {self._client.api_key}"}
+            )
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            data = payload.get("data", [])
+            models = [
+                model_id
+                for item in data
+                if isinstance(item, dict) and isinstance(model_id := item.get("id"), str)
+            ]
+            return models if models else default_models
+        except Exception:
+            return default_models

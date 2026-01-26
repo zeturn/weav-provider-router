@@ -63,8 +63,11 @@ class MistralChat(LLMBase):
                 yield chunk.choices[0].delta.content
 
     def list_models(self) -> list[str]:
-        """List available Mistral models."""
-        return [
+        """List available Mistral models (dynamically fetched)."""
+        import json
+        from urllib import request as urlrequest
+        
+        default_models = [
             "mistral-large-latest",
             "mistral-medium-latest",
             "mistral-small-latest",
@@ -72,3 +75,24 @@ class MistralChat(LLMBase):
             "open-mixtral-8x7b",
             "open-mixtral-8x22b",
         ]
+        
+        if not self._client.api_key:
+            return default_models
+            
+        try:
+            url = "https://api.mistral.ai/v1/models"
+            req = urlrequest.Request(
+                url,
+                headers={"Authorization": f"Bearer {self._client.api_key}"}
+            )
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            data = payload.get("data", [])
+            models = [
+                model_id
+                for item in data
+                if isinstance(item, dict) and isinstance(model_id := item.get("id"), str)
+            ]
+            return models if models else default_models
+        except Exception:
+            return default_models

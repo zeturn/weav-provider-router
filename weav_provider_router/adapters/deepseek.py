@@ -13,6 +13,8 @@ class DeepSeekChat(LLMBase):
             raise RuntimeError("openai package required. Install it to use DeepSeekChat.") from exc
         base_url = base_url or "https://api.deepseek.com"
         self._client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+        self._api_key = api_key
+        self._base_url = base_url
 
     async def chat(self, messages: list[dict[str, str]], config: CompletionConfig) -> str:
         resp = await self._client.chat.completions.create(
@@ -40,8 +42,34 @@ class DeepSeekChat(LLMBase):
                 yield delta
 
     def list_models(self) -> list[str]:
-        return [
+        """List available DeepSeek models (dynamically fetched)."""
+        import json
+        from urllib import request as urlrequest
+        
+        default_models = [
             "deepseek-chat",
             "deepseek-coder",
             "deepseek-reasoner",
         ]
+        
+        if not self._api_key:
+            return default_models
+            
+        try:
+            base_url = self._base_url or "https://api.deepseek.com"
+            url = f"{base_url.rstrip('/')}/v1/models"
+            req = urlrequest.Request(
+                url,
+                headers={"Authorization": f"Bearer {self._api_key}"}
+            )
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            data = payload.get("data", [])
+            models = [
+                model_id
+                for item in data
+                if isinstance(item, dict) and isinstance(model_id := item.get("id"), str)
+            ]
+            return models if models else default_models
+        except Exception:
+            return default_models

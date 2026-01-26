@@ -63,8 +63,11 @@ class ByteDanceChat(LLMBase):
                 yield chunk.choices[0].delta.content
 
     def list_models(self) -> list[str]:
-        """List available ByteDance Doubao models."""
-        return [
+        """List available ByteDance Doubao models (dynamically fetched)."""
+        import json
+        from urllib import request as urlrequest
+        
+        default_models = [
             "doubao-pro-4k",
             "doubao-pro-32k",
             "doubao-pro-128k",
@@ -72,3 +75,25 @@ class ByteDanceChat(LLMBase):
             "doubao-lite-32k",
             "doubao-lite-128k",
         ]
+        
+        if not self._client.api_key:
+            return default_models
+            
+        try:
+            base_url = self._base_url or "https://ark.cn-beijing.volces.com/api/v3"
+            url = f"{base_url.rstrip('/')}/models"
+            req = urlrequest.Request(
+                url,
+                headers={"Authorization": f"Bearer {self._client.api_key}"}
+            )
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            data = payload.get("data", [])
+            models = [
+                model_id
+                for item in data
+                if isinstance(item, dict) and isinstance(model_id := item.get("id"), str)
+            ]
+            return models if models else default_models
+        except Exception:
+            return default_models

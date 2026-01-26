@@ -16,9 +16,11 @@ class ZhipuChat(LLMBase):
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError("openai package required. Install it to use ZhipuChat.") from exc
 
+        self._api_key = api_key
+        self._base_url = base_url or "https://open.bigmodel.cn/api/paas/v4"
         self._client = AsyncOpenAI(
             api_key=api_key,
-            base_url=base_url or "https://open.bigmodel.cn/api/paas/v4",
+            base_url=self._base_url,
         )
 
     async def chat(self, messages: list[dict[str, str]], config: CompletionConfig) -> str:
@@ -117,7 +119,10 @@ class ZhipuChat(LLMBase):
                 yield delta
 
     def list_models(self) -> list[str]:
-        models = [
+        """List available Zhipu models (dynamically fetched)."""
+        from urllib import request as urlrequest
+        
+        default_models = [
             "glm-4.6",
             "glm-4.5",
             "glm-4.5-x",
@@ -131,10 +136,33 @@ class ZhipuChat(LLMBase):
             "glm-4.5-flash",
             "glm-4-flash-250414",
         ]
-        seen = set()
-        uniq: list[str] = []
-        for m in models:
-            if m not in seen:
-                seen.add(m)
-                uniq.append(m)
-        return uniq
+        
+        if not self._api_key:
+            return default_models
+            
+        try:
+            url = f"{self._base_url.rstrip('/')}/models"
+            req = urlrequest.Request(
+                url,
+                headers={"Authorization": f"Bearer {self._api_key}"}
+            )
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            data = payload.get("data", [])
+            models = [
+                model_id
+                for item in data
+                if isinstance(item, dict) and isinstance(model_id := item.get("id"), str)
+            ]
+            if models:
+                # Remove duplicates while preserving order
+                seen = set()
+                unique_models = []
+                for m in models:
+                    if m not in seen:
+                        seen.add(m)
+                        unique_models.append(m)
+                return unique_models
+            return default_models
+        except Exception:
+            return default_models

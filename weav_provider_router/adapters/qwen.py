@@ -13,6 +13,8 @@ class QwenChat(LLMBase):
             raise RuntimeError("openai package required. Install it to use QwenChat.") from exc
         base_url = base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1"
         self._client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+        self._api_key = api_key
+        self._base_url = base_url
 
     async def chat(self, messages: list[dict[str, str]], config: CompletionConfig) -> str:
         resp = await self._client.chat.completions.create(
@@ -40,7 +42,11 @@ class QwenChat(LLMBase):
                 yield delta
 
     def list_models(self) -> list[str]:
-        return [
+        """List available Qwen models (dynamically fetched)."""
+        import json
+        from urllib import request as urlrequest
+        
+        default_models = [
             "qwen-turbo",
             "qwen-plus",
             "qwen-max",
@@ -48,3 +54,25 @@ class QwenChat(LLMBase):
             "qwen-math-plus",
             "qwen-coder-turbo",
         ]
+        
+        if not self._api_key:
+            return default_models
+            
+        try:
+            base_url = self._base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            url = f"{base_url.rstrip('/')}/models"
+            req = urlrequest.Request(
+                url,
+                headers={"Authorization": f"Bearer {self._api_key}"}
+            )
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            data = payload.get("data", [])
+            models = [
+                model_id
+                for item in data
+                if isinstance(item, dict) and isinstance(model_id := item.get("id"), str)
+            ]
+            return models if models else default_models
+        except Exception:
+            return default_models
