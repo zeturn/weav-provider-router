@@ -20,9 +20,12 @@ async def chat_async(
     stop: Optional[list[str]] = None,
     extra: Optional[dict[str, Any]] = None,
 ) -> str:
+    if not model:
+        raise ValueError("model parameter is required and cannot be empty")
+    
     llm = build_provider(provider, api_key=api_key, base_url=base_url)
     cfg = CompletionConfig(
-        model=model or "",
+        model=model,
         temperature=temperature,
         max_tokens=max_tokens,
         top_p=top_p,
@@ -39,11 +42,20 @@ def chat(
     question: str,
     **kwargs: Any,
 ) -> str:
+    """Synchronous wrapper for chat_async.
+    
+    Note: If you're already in an async context, use chat_async() directly.
+    This function will raise RuntimeError if called within a running event loop.
+    """
     try:
         return asyncio.run(chat_async(provider, api_key, question, **kwargs))
-    except RuntimeError:
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(chat_async(provider, api_key, question, **kwargs))
+    except RuntimeError as e:
+        if "already running" in str(e).lower():
+            raise RuntimeError(
+                "Cannot use synchronous chat() within an async context. "
+                "Please use chat_async() instead."
+            ) from e
+        raise
 
 
 async def complete_async(
@@ -59,9 +71,12 @@ async def complete_async(
     stop: Optional[list[str]] = None,
     extra: Optional[dict[str, Any]] = None,
 ) -> str:
+    if not model:
+        raise ValueError("model parameter is required and cannot be empty")
+    
     llm = build_provider(provider, api_key=api_key, base_url=base_url)
     cfg = CompletionConfig(
-        model=model or "",
+        model=model,
         temperature=temperature,
         max_tokens=max_tokens,
         top_p=top_p,
@@ -77,11 +92,20 @@ def complete(
     prompt: str,
     **kwargs: Any,
 ) -> str:
+    """Synchronous wrapper for complete_async.
+    
+    Note: If you're already in an async context, use complete_async() directly.
+    This function will raise RuntimeError if called within a running event loop.
+    """
     try:
         return asyncio.run(complete_async(provider, api_key, prompt, **kwargs))
-    except RuntimeError:
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(complete_async(provider, api_key, prompt, **kwargs))
+    except RuntimeError as e:
+        if "already running" in str(e).lower():
+            raise RuntimeError(
+                "Cannot use synchronous complete() within an async context. "
+                "Please use complete_async() instead."
+            ) from e
+        raise
 
 
 def list_models(

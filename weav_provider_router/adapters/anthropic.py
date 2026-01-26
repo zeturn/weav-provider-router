@@ -121,7 +121,7 @@ class AnthropicChat(LLMBase):
                 "content": [
                     {
                         "type": "text",
-                        "text": "上一次回复为空。请输出一个 JSON（如 {\"type\":\"continue\"}）或直接给出答案，不能留空。",
+                        "text": "The previous response was empty. Please provide a valid response (e.g., a JSON object like {\"type\":\"continue\"} or a direct answer).",
                     }
                 ],
             }

@@ -8,14 +8,15 @@ from weav_provider_router.base import ImageBase, ImageConfig, ImageResponse
 class OpenAIImage(ImageBase):
     """OpenAI DALL-E image generation adapter."""
 
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         try:
             from openai import AsyncOpenAI  # type: ignore
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError("openai package is required for OpenAIImage. Install it to use this provider.") from exc
         
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url)
         self._api_key = api_key
+        self._base_url = base_url
 
     async def generate(self, prompt: str, config: ImageConfig) -> ImageResponse:
         """Generate an image using DALL-E."""

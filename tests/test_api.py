@@ -233,7 +233,38 @@ class TestErrorHandling:
             chat(
                 provider="invalid_provider",
                 api_key="test-key",
+                question="Test",
+                model="test-model"
+            )
+
+    def test_chat_with_missing_model(self):
+        """Test chat with missing model parameter raises error."""
+        with pytest.raises(ValueError, match="model parameter is required"):
+            chat(
+                provider="openai",
+                api_key="test-key",
                 question="Test"
+            )
+
+    @pytest.mark.asyncio
+    async def test_chat_async_with_missing_model(self):
+        """Test chat_async with missing model parameter raises error."""
+        with pytest.raises(ValueError, match="model parameter is required"):
+            await chat_async(
+                provider="openai",
+                api_key="test-key",
+                question="Test"
+            )
+
+    @pytest.mark.asyncio
+    async def test_chat_async_with_empty_model(self):
+        """Test chat_async with empty model parameter raises error."""
+        with pytest.raises(ValueError, match="model parameter is required"):
+            await chat_async(
+                provider="openai",
+                api_key="test-key",
+                question="Test",
+                model=""
             )
 
     @pytest.mark.asyncio
@@ -248,21 +279,25 @@ class TestErrorHandling:
                 await chat_async(
                     provider="openai",
                     api_key="test-key",
-                    question="Test"
+                    question="Test",
+                    model="gpt-4"
                 )
 
     def test_complete_with_missing_model(self):
-        """Test complete with missing model parameter."""
-        with patch("weav_provider_router.api.build_provider") as mock_build:
-            mock_provider = MagicMock()
-            mock_provider.complete = AsyncMock(return_value="Response")
-            mock_build.return_value = mock_provider
-
-            # Should work with empty model string
-            response = complete(
+        """Test complete with missing model parameter raises error."""
+        with pytest.raises(ValueError, match="model parameter is required"):
+            complete(
                 provider="openai",
                 api_key="test-key",
                 prompt="Test"
             )
 
-            assert response == "Response"
+    @pytest.mark.asyncio
+    async def test_complete_async_with_missing_model(self):
+        """Test complete_async with missing model parameter raises error."""
+        with pytest.raises(ValueError, match="model parameter is required"):
+            await complete_async(
+                provider="openai",
+                api_key="test-key",
+                prompt="Test"
+            )

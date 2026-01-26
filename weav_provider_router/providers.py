@@ -92,24 +92,44 @@ def build_provider(provider: str, api_key: Optional[str] = None, base_url: Optio
     return cls(api_key=api_key, base_url=base_url)  # type: ignore[call-arg]
 
 
-def build_image_provider(provider: str, api_key: Optional[str] = None, **kwargs) -> ImageBase:
-    """Construct and return an image generation provider adapter instance."""
+def build_image_provider(provider: str, api_key: Optional[str] = None, base_url: Optional[str] = None, **kwargs) -> ImageBase:
+    """Construct and return an image generation provider adapter instance.
+    
+    Args:
+        provider: Provider name (e.g., 'openai', 'dall-e')
+        api_key: API key for authentication
+        base_url: Optional custom base URL to override default endpoint
+        **kwargs: Additional provider-specific parameters
+    
+    Returns:
+        ImageBase: Configured image provider instance
+    """
     p = provider.lower()
     if p not in IMAGE_PROVIDER_CLASSES:
         raise ValueError(f"Unsupported image provider: {provider}")
 
     cls = IMAGE_PROVIDER_CLASSES[p]
-    return cls(api_key=api_key)  # type: ignore[call-arg]
+    return cls(api_key=api_key, base_url=base_url)  # type: ignore[call-arg]
 
 
-def build_embedding_provider(provider: str, api_key: Optional[str] = None, **kwargs) -> EmbeddingBase:
-    """Construct and return an embedding provider adapter instance."""
+def build_embedding_provider(provider: str, api_key: Optional[str] = None, base_url: Optional[str] = None, **kwargs) -> EmbeddingBase:
+    """Construct and return an embedding provider adapter instance.
+    
+    Args:
+        provider: Provider name (e.g., 'openai')
+        api_key: API key for authentication
+        base_url: Optional custom base URL to override default endpoint
+        **kwargs: Additional provider-specific parameters
+    
+    Returns:
+        EmbeddingBase: Configured embedding provider instance
+    """
     p = provider.lower()
     if p not in EMBEDDING_PROVIDER_CLASSES:
         raise ValueError(f"Unsupported embedding provider: {provider}")
 
     cls = EMBEDDING_PROVIDER_CLASSES[p]
-    return cls(api_key=api_key)  # type: ignore[call-arg]
+    return cls(api_key=api_key, base_url=base_url)  # type: ignore[call-arg]
 
 
 __all__ = [

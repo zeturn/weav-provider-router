@@ -8,14 +8,15 @@ from weav_provider_router.base import EmbeddingBase, EmbeddingConfig
 class OpenAIEmbedding(EmbeddingBase):
     """OpenAI text embeddings adapter."""
 
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         try:
             from openai import AsyncOpenAI  # type: ignore
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError("openai package is required for OpenAIEmbedding. Install it to use this provider.") from exc
         
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url)
         self._api_key = api_key
+        self._base_url = base_url
 
     async def embed(self, texts: list[str], config: EmbeddingConfig) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
