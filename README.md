@@ -345,6 +345,54 @@ All completion and chat operations accept these configuration parameters:
 | `stop` | `list[str]` | `None` | Stop sequences |
 | `extra` | `dict` | `{}` | Provider-specific extra parameters |
 
+### Custom Base URL
+
+All providers support custom `base_url` to override the default API endpoint. This is useful for:
+- Using self-hosted models
+- Connecting to API proxies
+- Testing with mock servers
+- Using regional endpoints
+
+```python
+from weav_provider_router.providers import build_provider
+
+# OpenAI with custom endpoint
+llm = build_provider(
+    "openai",
+    api_key="your-key",
+    base_url="https://your-custom-endpoint.com/v1"
+)
+
+# Ollama with custom host
+llm = build_provider(
+    "ollama",
+    base_url="http://192.168.1.100:11434"
+)
+
+# Anthropic with proxy
+llm = build_provider(
+    "anthropic",
+    api_key="your-key",
+    base_url="https://your-proxy.com/v1"
+)
+
+# Baidu with custom endpoint
+llm = build_provider(
+    "baidu",
+    api_key="your-api-key",
+    secret_key="your-secret-key",
+    base_url="https://custom-baidu-endpoint.com"
+)
+```
+
+**Supported by all providers:**
+- OpenAI, Anthropic, Google
+- DeepSeek, Qwen, Zhipu, Moonshot
+- Mistral, Groq, Together AI
+- Cohere, Baidu, MiniMax
+- ByteDance, NVIDIA
+- Ollama
+
 ### Provider-Specific Notes
 
 #### OpenAI

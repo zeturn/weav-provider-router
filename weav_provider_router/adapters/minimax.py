@@ -8,7 +8,7 @@ from weav_provider_router.base import CompletionConfig, LLMBase
 class MiniMaxChat(LLMBase):
     """MiniMax (海螺AI) chat adapter."""
 
-    def __init__(self, api_key: str | None = None, group_id: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, group_id: str | None = None, base_url: str | None = None) -> None:
         try:
             import httpx  # type: ignore
         except Exception as exc:  # noqa: BLE001
@@ -16,8 +16,8 @@ class MiniMaxChat(LLMBase):
         
         self._api_key = api_key
         self._group_id = group_id
+        self._base_url = base_url or "https://api.minimax.chat/v1"
         self._client = httpx.AsyncClient(timeout=60.0)
-        self._base_url = "https://api.minimax.chat/v1"
 
     async def chat(self, messages: list[dict[str, Any]], config: CompletionConfig) -> str:
         """Send a chat request to MiniMax."""

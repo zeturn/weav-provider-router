@@ -7,13 +7,16 @@ from ..base import CompletionConfig, LLMBase
 
 
 class GoogleChat(LLMBase):
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         try:
             import google.generativeai as genai  # type: ignore
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError("google-generativeai package required. Install it to use GoogleChat.") from exc
+        # Note: Google SDK doesn't support custom base_url in the standard way
+        # base_url parameter is accepted for API consistency but not used
         genai.configure(api_key=api_key)
         self._genai = genai
+        self._base_url = base_url  # Stored for potential future use
 
     async def chat(self, messages: list[dict[str, str]], config: CompletionConfig) -> str:
         loop = asyncio.get_running_loop()

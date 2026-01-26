@@ -12,12 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class AnthropicChat(LLMBase):
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         try:
             import anthropic  # type: ignore
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError("anthropic package required. Install it to use AnthropicChat.") from exc
-        self._client = anthropic.AsyncAnthropic(api_key=api_key)
+        kwargs = {"api_key": api_key}
+        if base_url:
+            kwargs["base_url"] = base_url
+        self._client = anthropic.AsyncAnthropic(**kwargs)
         self._api_key = api_key
 
     @staticmethod

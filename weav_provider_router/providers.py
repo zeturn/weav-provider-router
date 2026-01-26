@@ -59,30 +59,37 @@ PROVIDER_CLASSES = LLM_PROVIDER_CLASSES
 
 
 def build_provider(provider: str, api_key: Optional[str] = None, base_url: Optional[str] = None, **kwargs) -> LLMBase:
-    """Construct and return an LLM provider adapter instance."""
+    """Construct and return an LLM provider adapter instance.
+    
+    Args:
+        provider: Provider name (e.g., 'openai', 'anthropic')
+        api_key: API key for authentication
+        base_url: Optional custom base URL to override default endpoint
+        **kwargs: Additional provider-specific parameters (e.g., secret_key for Baidu, group_id for MiniMax)
+    
+    Returns:
+        LLMBase: Configured provider instance
+    """
     p = provider.lower()
     if p not in LLM_PROVIDER_CLASSES:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 
     cls = LLM_PROVIDER_CLASSES[p]
 
+    # Special cases with unique parameters
     if p == "ollama":
         return cls(base_url=base_url or "http://localhost:11434")  # type: ignore[call-arg]
 
     if p == "baidu":
-        # Baidu requires both api_key and secret_key
         secret_key = kwargs.get("secret_key")
-        return cls(api_key=api_key, secret_key=secret_key)  # type: ignore[call-arg]
+        return cls(api_key=api_key, secret_key=secret_key, base_url=base_url)  # type: ignore[call-arg]
     
     if p == "minimax":
-        # MiniMax requires group_id
         group_id = kwargs.get("group_id")
-        return cls(api_key=api_key, group_id=group_id)  # type: ignore[call-arg]
+        return cls(api_key=api_key, group_id=group_id, base_url=base_url)  # type: ignore[call-arg]
 
-    if p in {"openai", "deepseek", "qwen", "zhipu", "moonshot", "mistral", "groq", "together", "bytedance", "nvidia"}:
-        return cls(api_key=api_key, base_url=base_url)  # type: ignore[call-arg]
-
-    return cls(api_key=api_key)  # type: ignore[call-arg]
+    # All other providers support standard api_key + base_url pattern
+    return cls(api_key=api_key, base_url=base_url)  # type: ignore[call-arg]
 
 
 def build_image_provider(provider: str, api_key: Optional[str] = None, **kwargs) -> ImageBase:

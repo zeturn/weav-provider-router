@@ -9,13 +9,14 @@ from weav_provider_router.base import CompletionConfig, LLMBase
 class CohereChat(LLMBase):
     """Cohere chat adapter."""
 
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         try:
             import httpx  # type: ignore
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError("httpx package is required for CohereChat. Install it to use this provider.") from exc
         
         self._api_key = api_key
+        self._base_url = base_url or "https://api.cohere.com/v1"
         self._client = httpx.AsyncClient(
             timeout=60.0,
             headers={
@@ -23,7 +24,6 @@ class CohereChat(LLMBase):
                 "Content-Type": "application/json",
             }
         )
-        self._base_url = "https://api.cohere.ai/v1"
 
     def _convert_messages(self, messages: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
         """Convert messages to Cohere format (chat_history + message)."""

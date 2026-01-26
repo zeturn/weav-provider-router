@@ -9,7 +9,7 @@ from weav_provider_router.base import CompletionConfig, LLMBase
 class BaiduChat(LLMBase):
     """Baidu ERNIE (文心一言) chat adapter."""
 
-    def __init__(self, api_key: str | None = None, secret_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, secret_key: str | None = None, base_url: str | None = None) -> None:
         try:
             import httpx  # type: ignore
         except Exception as exc:  # noqa: BLE001
@@ -17,6 +17,7 @@ class BaiduChat(LLMBase):
         
         self._api_key = api_key
         self._secret_key = secret_key
+        self._base_url = base_url or "https://aip.baidubce.com"
         self._client = httpx.AsyncClient(timeout=60.0)
         self._access_token: str | None = None
 
@@ -28,7 +29,7 @@ class BaiduChat(LLMBase):
         if not self._api_key or not self._secret_key:
             raise RuntimeError("Both api_key and secret_key are required for Baidu ERNIE")
         
-        url = f"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={self._api_key}&client_secret={self._secret_key}"
+        url = f"{self._base_url.rstrip('/')}/oauth/2.0/token?grant_type=client_credentials&client_id={self._api_key}&client_secret={self._secret_key}"
         response = await self._client.get(url)
         result = response.json()
         
@@ -49,7 +50,7 @@ class BaiduChat(LLMBase):
             "ernie-tiny-8k": "ernie-tiny-8k",
         }
         endpoint = endpoints.get(model, "completions_pro")
-        return f"https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/{endpoint}"
+        return f"{self._base_url.rstrip('/')}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/{endpoint}"
 
     async def chat(self, messages: list[dict[str, Any]], config: CompletionConfig) -> str:
         """Send a chat request to Baidu ERNIE."""
