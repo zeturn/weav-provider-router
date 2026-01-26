@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from ..base import LLMBase
+from .base import LLMBase
 from .adapters.openai import OpenAIChat
 from .adapters.anthropic import AnthropicChat
 from .adapters.google import GoogleChat

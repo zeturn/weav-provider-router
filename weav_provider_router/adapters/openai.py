@@ -4,7 +4,7 @@ import json
 from typing import Any, AsyncIterator
 from urllib import request as urlrequest
 
-from ..base import CompletionConfig, LLMBase
+from weav_provider_router.base import CompletionConfig, LLMBase
 
 
 class OpenAIChat(LLMBase):

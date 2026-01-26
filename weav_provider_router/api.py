@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Optional
 
-from ..base import CompletionConfig
+from .base import CompletionConfig
 from .providers import build_provider
 
 
