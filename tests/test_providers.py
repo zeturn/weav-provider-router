@@ -9,6 +9,12 @@ from weav_provider_router.adapters.ollama import OllamaChat
 from weav_provider_router.adapters.deepseek import DeepSeekChat
 from weav_provider_router.adapters.qwen import QwenChat
 from weav_provider_router.adapters.zhipu import ZhipuChat
+from weav_provider_router.adapters.moonshot import MoonshotChat
+from weav_provider_router.adapters.baidu import BaiduChat
+from weav_provider_router.adapters.mistral import MistralChat
+from weav_provider_router.adapters.groq import GroqChat
+from weav_provider_router.adapters.together import TogetherChat
+from weav_provider_router.adapters.cohere import CohereChat
 
 
 @pytest.mark.unit
@@ -25,6 +31,12 @@ class TestProviderRegistry:
             "deepseek",
             "qwen",
             "zhipu",
+            "moonshot",
+            "baidu",
+            "mistral",
+            "groq",
+            "together",
+            "cohere",
         ]
         for provider in expected_providers:
             assert provider in PROVIDER_CLASSES
@@ -37,6 +49,13 @@ class TestProviderRegistry:
         assert PROVIDER_CLASSES["ollama"] == OllamaChat
         assert PROVIDER_CLASSES["deepseek"] == DeepSeekChat
         assert PROVIDER_CLASSES["qwen"] == QwenChat
+        assert PROVIDER_CLASSES["zhipu"] == ZhipuChat
+        assert PROVIDER_CLASSES["moonshot"] == MoonshotChat
+        assert PROVIDER_CLASSES["baidu"] == BaiduChat
+        assert PROVIDER_CLASSES["mistral"] == MistralChat
+        assert PROVIDER_CLASSES["groq"] == GroqChat
+        assert PROVIDER_CLASSES["together"] == TogetherChat
+        assert PROVIDER_CLASSES["cohere"] == CohereChat
         assert PROVIDER_CLASSES["zhipu"] == ZhipuChat
 
 
@@ -89,6 +108,36 @@ class TestBuildProvider:
         """Test building Zhipu provider."""
         provider = build_provider("zhipu", api_key="test-key")
         assert isinstance(provider, ZhipuChat)
+
+    def test_build_moonshot_provider(self):
+        """Test building Moonshot provider."""
+        provider = build_provider("moonshot", api_key="test-key")
+        assert isinstance(provider, MoonshotChat)
+
+    def test_build_baidu_provider(self):
+        """Test building Baidu provider."""
+        provider = build_provider("baidu", api_key="test-key", secret_key="test-secret")
+        assert isinstance(provider, BaiduChat)
+
+    def test_build_mistral_provider(self):
+        """Test building Mistral provider."""
+        provider = build_provider("mistral", api_key="test-key")
+        assert isinstance(provider, MistralChat)
+
+    def test_build_groq_provider(self):
+        """Test building Groq provider."""
+        provider = build_provider("groq", api_key="test-key")
+        assert isinstance(provider, GroqChat)
+
+    def test_build_together_provider(self):
+        """Test building Together AI provider."""
+        provider = build_provider("together", api_key="test-key")
+        assert isinstance(provider, TogetherChat)
+
+    def test_build_cohere_provider(self):
+        """Test building Cohere provider."""
+        provider = build_provider("cohere", api_key="test-key")
+        assert isinstance(provider, CohereChat)
 
     def test_case_insensitive_provider_name(self):
         """Test that provider names are case-insensitive."""

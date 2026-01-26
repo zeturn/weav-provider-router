@@ -5,7 +5,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A unified interface for multiple LLM providers, offering seamless integration with OpenAI, Anthropic, Google, Ollama, DeepSeek, Qwen, and Zhipu.
+A unified interface for multiple LLM providers, offering seamless integration with 13+ popular providers including OpenAI, Anthropic, Google, Moonshot, Baidu, Mistral, Groq, and more.
 
 ## Features
 
@@ -15,18 +15,25 @@ A unified interface for multiple LLM providers, offering seamless integration wi
 - 🔌 **Extensible**: Easy to add new providers via adapter pattern
 - 🎯 **Type-Safe**: Full type hints for better IDE support
 - 🧪 **Well-Tested**: Comprehensive test coverage
+- 🌍 **Global Coverage**: Support for both international and Chinese LLM providers
 
 ## Supported Providers
 
-| Provider | Chat | Completion | Streaming | List Models |
-|----------|------|------------|-----------|-------------|
-| OpenAI | ✅ | ✅ | ✅ | ✅ |
-| Anthropic | ✅ | ✅ | ✅ | ✅ |
-| Google | ✅ | ✅ | ✅ | ✅ |
-| Ollama | ✅ | ✅ | ✅ | ✅ |
-| DeepSeek | ✅ | ✅ | ✅ | ✅ |
-| Qwen | ✅ | ✅ | ✅ | ✅ |
-| Zhipu | ✅ | ✅ | ✅ | ✅ |
+| Provider | Chat | Completion | Streaming | List Models | Notes |
+|----------|------|------------|-----------|-------------|-------|
+| OpenAI | ✅ | ✅ | ✅ | ✅ | GPT-4, GPT-3.5, etc. |
+| Anthropic | ✅ | ✅ | ✅ | ✅ | Claude models |
+| Google | ✅ | ✅ | ✅ | ✅ | Gemini models |
+| Moonshot | ✅ | ✅ | ✅ | ✅ | Kimi (月之暗面) |
+| Baidu | ✅ | ✅ | ✅ | ✅ | ERNIE (文心一言) |
+| Mistral | ✅ | ✅ | ✅ | ✅ | Mistral AI models |
+| Groq | ✅ | ✅ | ✅ | ✅ | Ultra-fast inference |
+| Together AI | ✅ | ✅ | ✅ | ✅ | Multi-model platform |
+| Cohere | ✅ | ✅ | ✅ | ✅ | Command models |
+| DeepSeek | ✅ | ✅ | ✅ | ✅ | DeepSeek models |
+| Qwen | ✅ | ✅ | ✅ | ✅ | 通义千问 |
+| Zhipu | ✅ | ✅ | ✅ | ✅ | 智谱 AI |
+| Ollama | ✅ | ✅ | ✅ | ✅ | Local models |
 
 ## Installation
 
@@ -270,6 +277,48 @@ All completion and chat operations accept these configuration parameters:
 - Chinese LLM providers
 - OpenAI-compatible API format
 - Require API keys from respective platforms
+
+#### Moonshot (Kimi)
+- Long-context specialist (8K/32K/128K)
+- API endpoint: `https://api.moonshot.cn/v1`
+- OpenAI-compatible format
+
+#### Baidu ERNIE (文心一言)
+- Requires both `api_key` and `secret_key`
+- OAuth-based authentication
+- Use `secret_key` parameter when building provider
+
+```python
+from weav_provider_router import chat
+
+response = chat(
+    provider="baidu",
+    api_key="your-api-key",
+    secret_key="your-secret-key",  # Required for Baidu
+    question="你好",
+    model="ernie-4.0-8k"
+)
+```
+
+#### Mistral AI
+- European AI provider
+- Supports Mistral Large, Medium, Small
+- Open-source model options
+
+#### Groq
+- Ultra-fast LLM inference (up to 750 tokens/sec)
+- Supports Llama, Mixtral, Gemma models
+- Best for low-latency applications
+
+#### Together AI
+- Multi-model aggregation platform
+- Access to Llama, Mistral, Qwen, DeepSeek models
+- Competitive pricing
+
+#### Cohere
+- Enterprise-focused LLM provider
+- Command R/R+ models
+- Specialized for business applications
 
 ## API Reference
 

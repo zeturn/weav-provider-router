@@ -10,6 +10,12 @@ from .adapters.ollama import OllamaChat
 from .adapters.deepseek import DeepSeekChat
 from .adapters.qwen import QwenChat
 from .adapters.zhipu import ZhipuChat
+from .adapters.moonshot import MoonshotChat
+from .adapters.baidu import BaiduChat
+from .adapters.mistral import MistralChat
+from .adapters.groq import GroqChat
+from .adapters.together import TogetherChat
+from .adapters.cohere import CohereChat
 
 
 PROVIDER_CLASSES = {
@@ -20,10 +26,16 @@ PROVIDER_CLASSES = {
     "deepseek": DeepSeekChat,
     "qwen": QwenChat,
     "zhipu": ZhipuChat,
+    "moonshot": MoonshotChat,
+    "baidu": BaiduChat,
+    "mistral": MistralChat,
+    "groq": GroqChat,
+    "together": TogetherChat,
+    "cohere": CohereChat,
 }
 
 
-def build_provider(provider: str, api_key: Optional[str] = None, base_url: Optional[str] = None) -> LLMBase:
+def build_provider(provider: str, api_key: Optional[str] = None, base_url: Optional[str] = None, **kwargs) -> LLMBase:
     """Construct and return a provider adapter instance."""
     p = provider.lower()
     if p not in PROVIDER_CLASSES:
@@ -34,7 +46,12 @@ def build_provider(provider: str, api_key: Optional[str] = None, base_url: Optio
     if p == "ollama":
         return cls(base_url=base_url or "http://localhost:11434")  # type: ignore[call-arg]
 
-    if p in {"openai", "deepseek", "qwen", "zhipu"}:
+    if p == "baidu":
+        # Baidu requires both api_key and secret_key
+        secret_key = kwargs.get("secret_key")
+        return cls(api_key=api_key, secret_key=secret_key)  # type: ignore[call-arg]
+
+    if p in {"openai", "deepseek", "qwen", "zhipu", "moonshot", "mistral", "groq", "together"}:
         return cls(api_key=api_key, base_url=base_url)  # type: ignore[call-arg]
 
     return cls(api_key=api_key)  # type: ignore[call-arg]
