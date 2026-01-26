@@ -12,7 +12,7 @@ class TestOpenAIChat:
 
     def test_initialization(self):
         """Test OpenAI adapter initialization."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key="test-key", base_url="https://api.openai.com")
             assert adapter._api_key == "test-key"
             assert adapter._base_url == "https://api.openai.com"
@@ -35,7 +35,7 @@ class TestOpenAIChat:
 
     def test_build_chat_kwargs_basic(self):
         """Test building chat kwargs with basic config."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key="test-key")
             config = CompletionConfig(
                 model="gpt-4",
@@ -55,7 +55,7 @@ class TestOpenAIChat:
 
     def test_build_chat_kwargs_o1_model(self):
         """Test building chat kwargs for O1 model."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key="test-key")
             config = CompletionConfig(
                 model="o1-preview",
@@ -72,7 +72,7 @@ class TestOpenAIChat:
 
     def test_build_chat_kwargs_with_stop(self):
         """Test building chat kwargs with stop sequences."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key="test-key")
             config = CompletionConfig(
                 model="gpt-4",
@@ -86,7 +86,7 @@ class TestOpenAIChat:
 
     def test_build_chat_kwargs_with_extra(self):
         """Test building chat kwargs with extra parameters."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key="test-key")
             config = CompletionConfig(
                 model="gpt-4",
@@ -101,7 +101,7 @@ class TestOpenAIChat:
 
     def test_build_chat_kwargs_streaming(self):
         """Test building chat kwargs for streaming."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key="test-key")
             config = CompletionConfig(model="gpt-4")
             messages = [{"role": "user", "content": "Hello"}]
@@ -113,7 +113,7 @@ class TestOpenAIChat:
     @pytest.mark.asyncio
     async def test_chat(self):
         """Test chat method."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI") as mock_openai:
+        with patch("openai.AsyncOpenAI") as mock_openai:
             mock_response = MagicMock()
             mock_response.choices = [MagicMock(message=MagicMock(content="Test response"))]
             mock_client = MagicMock()
@@ -132,7 +132,7 @@ class TestOpenAIChat:
     @pytest.mark.asyncio
     async def test_complete(self):
         """Test complete method."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI") as mock_openai:
+        with patch("openai.AsyncOpenAI") as mock_openai:
             mock_response = MagicMock()
             mock_response.choices = [MagicMock(message=MagicMock(content="Completed text"))]
             mock_client = MagicMock()
@@ -149,7 +149,7 @@ class TestOpenAIChat:
     @pytest.mark.asyncio
     async def test_stream(self):
         """Test streaming method."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI") as mock_openai:
+        with patch("openai.AsyncOpenAI") as mock_openai:
             # Create mock stream chunks
             mock_chunks = [
                 MagicMock(choices=[MagicMock(delta=MagicMock(content="Hello"))]),
@@ -177,7 +177,7 @@ class TestOpenAIChat:
 
     def test_list_models(self):
         """Test list_models method."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             with patch("weav_provider_router.adapters.openai.urlrequest.urlopen") as mock_urlopen:
                 mock_response = MagicMock()
                 mock_response.read.return_value = b'{"data": [{"id": "gpt-4"}, {"id": "gpt-3.5-turbo"}]}'
@@ -191,14 +191,14 @@ class TestOpenAIChat:
 
     def test_list_models_without_api_key(self):
         """Test list_models raises error without API key."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             adapter = OpenAIChat(api_key=None)
             with pytest.raises(RuntimeError, match="OPENAI_API_KEY is required"):
                 adapter.list_models()
 
     def test_list_models_with_custom_base_url(self):
         """Test list_models with custom base URL."""
-        with patch("weav_provider_router.adapters.openai.AsyncOpenAI"):
+        with patch("openai.AsyncOpenAI"):
             with patch("weav_provider_router.adapters.openai.urlrequest.urlopen") as mock_urlopen:
                 mock_response = MagicMock()
                 mock_response.read.return_value = b'{"data": [{"id": "custom-model"}]}'

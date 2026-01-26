@@ -61,6 +61,7 @@ class TestBuildProvider:
 
     def test_build_google_provider(self):
         """Test building Google provider."""
+        pytest.importorskip("google.generativeai", reason="google-generativeai not installed")
         provider = build_provider("google", api_key="test-key")
         assert isinstance(provider, GoogleChat)
 
