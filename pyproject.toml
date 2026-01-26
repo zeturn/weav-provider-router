@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "weav-provider-router"
-version = "0.1.0"
-description = "A unified interface for multiple LLM providers"
+version = "0.2.0"
+description = "A multi-modal AI provider router supporting LLM, image generation, and embeddings"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Weav Team"}
 ]
-keywords = ["llm", "openai", "anthropic", "google", "ollama", "ai", "nlp"]
+keywords = ["llm", "openai", "anthropic", "google", "ollama", "ai", "nlp", "image-generation", "embeddings", "dall-e", "multi-modal", "minimax", "bytedance", "nvidia"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
