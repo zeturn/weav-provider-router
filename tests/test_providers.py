@@ -1,7 +1,7 @@
 """Unit tests for provider builder and registry."""
 
 import pytest
-from weav_provider_router.providers import build_provider, PROVIDER_CLASSES
+from weav_provider_router.providers import build_provider, build_image_provider, build_embedding_provider, LLM_PROVIDER_CLASSES
 from weav_provider_router.adapters.openai import OpenAIChat
 from weav_provider_router.adapters.anthropic import AnthropicChat
 from weav_provider_router.adapters.google import GoogleChat
@@ -15,6 +15,11 @@ from weav_provider_router.adapters.mistral import MistralChat
 from weav_provider_router.adapters.groq import GroqChat
 from weav_provider_router.adapters.together import TogetherChat
 from weav_provider_router.adapters.cohere import CohereChat
+from weav_provider_router.adapters.minimax import MiniMaxChat
+from weav_provider_router.adapters.bytedance import ByteDanceChat
+from weav_provider_router.adapters.nvidia import NVIDIAChat
+from weav_provider_router.adapters.openai_image import OpenAIImage
+from weav_provider_router.adapters.openai_embedding import OpenAIEmbedding
 
 
 @pytest.mark.unit
@@ -37,25 +42,31 @@ class TestProviderRegistry:
             "groq",
             "together",
             "cohere",
+            "minimax",
+            "bytedance",
+            "nvidia",
         ]
         for provider in expected_providers:
-            assert provider in PROVIDER_CLASSES
+            assert provider in LLM_PROVIDER_CLASSES
 
     def test_provider_classes_mapping(self):
         """Test that provider classes are correctly mapped."""
-        assert PROVIDER_CLASSES["openai"] == OpenAIChat
-        assert PROVIDER_CLASSES["anthropic"] == AnthropicChat
-        assert PROVIDER_CLASSES["google"] == GoogleChat
-        assert PROVIDER_CLASSES["ollama"] == OllamaChat
-        assert PROVIDER_CLASSES["deepseek"] == DeepSeekChat
-        assert PROVIDER_CLASSES["qwen"] == QwenChat
-        assert PROVIDER_CLASSES["zhipu"] == ZhipuChat
-        assert PROVIDER_CLASSES["moonshot"] == MoonshotChat
-        assert PROVIDER_CLASSES["baidu"] == BaiduChat
-        assert PROVIDER_CLASSES["mistral"] == MistralChat
-        assert PROVIDER_CLASSES["groq"] == GroqChat
-        assert PROVIDER_CLASSES["together"] == TogetherChat
-        assert PROVIDER_CLASSES["cohere"] == CohereChat
+        assert LLM_PROVIDER_CLASSES["openai"] == OpenAIChat
+        assert LLM_PROVIDER_CLASSES["anthropic"] == AnthropicChat
+        assert LLM_PROVIDER_CLASSES["google"] == GoogleChat
+        assert LLM_PROVIDER_CLASSES["ollama"] == OllamaChat
+        assert LLM_PROVIDER_CLASSES["deepseek"] == DeepSeekChat
+        assert LLM_PROVIDER_CLASSES["qwen"] == QwenChat
+        assert LLM_PROVIDER_CLASSES["zhipu"] == ZhipuChat
+        assert LLM_PROVIDER_CLASSES["moonshot"] == MoonshotChat
+        assert LLM_PROVIDER_CLASSES["baidu"] == BaiduChat
+        assert LLM_PROVIDER_CLASSES["mistral"] == MistralChat
+        assert LLM_PROVIDER_CLASSES["groq"] == GroqChat
+        assert LLM_PROVIDER_CLASSES["together"] == TogetherChat
+        assert LLM_PROVIDER_CLASSES["cohere"] == CohereChat
+        assert LLM_PROVIDER_CLASSES["minimax"] == MiniMaxChat
+        assert LLM_PROVIDER_CLASSES["bytedance"] == ByteDanceChat
+        assert LLM_PROVIDER_CLASSES["nvidia"] == NVIDIAChat
         assert PROVIDER_CLASSES["zhipu"] == ZhipuChat
 
 
@@ -145,6 +156,24 @@ class TestBuildProvider:
         provider = build_provider("cohere", api_key="test-key")
         assert isinstance(provider, CohereChat)
 
+    def test_build_minimax_provider(self):
+        """Test building MiniMax provider."""
+        pytest.importorskip("httpx", reason="httpx not installed")
+        provider = build_provider("minimax", api_key="test-key", group_id="test-group")
+        assert isinstance(provider, MiniMaxChat)
+
+    def test_build_bytedance_provider(self):
+        """Test building ByteDance provider."""
+        pytest.importorskip("openai", reason="openai not installed")
+        provider = build_provider("bytedance", api_key="test-key")
+        assert isinstance(provider, ByteDanceChat)
+
+    def test_build_nvidia_provider(self):
+        """Test building NVIDIA provider."""
+        pytest.importorskip("openai", reason="openai not installed")
+        provider = build_provider("nvidia", api_key="test-key")
+        assert isinstance(provider, NVIDIAChat)
+
     def test_case_insensitive_provider_name(self):
         """Test that provider names are case-insensitive."""
         provider1 = build_provider("OpenAI", api_key="test-key")
@@ -154,10 +183,48 @@ class TestBuildProvider:
 
     def test_unsupported_provider_raises_error(self):
         """Test that unsupported provider raises ValueError."""
-        with pytest.raises(ValueError, match="Unsupported provider: unknown"):
+        with pytest.raises(ValueError, match="Unsupported LLM provider: unknown"):
             build_provider("unknown", api_key="test-key")
 
     def test_build_provider_without_api_key(self):
         """Test building provider without API key (for Ollama)."""
         provider = build_provider("ollama")
         assert isinstance(provider, OllamaChat)
+
+
+@pytest.mark.unit
+class TestImageProviders:
+    """Tests for image generation provider builder."""
+
+    def test_build_openai_image_provider(self):
+        """Test building OpenAI image provider."""
+        pytest.importorskip("openai", reason="openai not installed")
+        provider = build_image_provider("openai", api_key="test-key")
+        assert isinstance(provider, OpenAIImage)
+
+    def test_build_dall_e_alias(self):
+        """Test building with dall-e alias."""
+        pytest.importorskip("openai", reason="openai not installed")
+        provider = build_image_provider("dall-e", api_key="test-key")
+        assert isinstance(provider, OpenAIImage)
+
+    def test_unsupported_image_provider_raises_error(self):
+        """Test that unsupported image provider raises ValueError."""
+        with pytest.raises(ValueError, match="Unsupported image provider: unknown"):
+            build_image_provider("unknown", api_key="test-key")
+
+
+@pytest.mark.unit
+class TestEmbeddingProviders:
+    """Tests for embedding provider builder."""
+
+    def test_build_openai_embedding_provider(self):
+        """Test building OpenAI embedding provider."""
+        pytest.importorskip("openai", reason="openai not installed")
+        provider = build_embedding_provider("openai", api_key="test-key")
+        assert isinstance(provider, OpenAIEmbedding)
+
+    def test_unsupported_embedding_provider_raises_error(self):
+        """Test that unsupported embedding provider raises ValueError."""
+        with pytest.raises(ValueError, match="Unsupported embedding provider: unknown"):
+            build_embedding_provider("unknown", api_key="test-key")

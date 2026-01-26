@@ -11,8 +11,14 @@ from .mistral import MistralChat
 from .groq import GroqChat
 from .together import TogetherChat
 from .cohere import CohereChat
+from .minimax import MiniMaxChat
+from .bytedance import ByteDanceChat
+from .nvidia import NVIDIAChat
+from .openai_image import OpenAIImage
+from .openai_embedding import OpenAIEmbedding
 
 __all__ = [
+    # LLM Adapters
     "OpenAIChat",
     "AnthropicChat",
     "GoogleChat",
@@ -26,4 +32,11 @@ __all__ = [
     "GroqChat",
     "TogetherChat",
     "CohereChat",
+    "MiniMaxChat",
+    "ByteDanceChat",
+    "NVIDIAChat",
+    # Image Adapters
+    "OpenAIImage",
+    # Embedding Adapters
+    "OpenAIEmbedding",
 ]
