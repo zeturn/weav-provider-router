@@ -5,35 +5,55 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A unified interface for multiple LLM providers, offering seamless integration with 13+ popular providers including OpenAI, Anthropic, Google, Moonshot, Baidu, Mistral, Groq, and more.
+A unified **multi-modal AI provider router** supporting LLM chat, image generation, and embeddings. Seamlessly integrate with 16+ LLM providers including OpenAI, Anthropic, Google, and Chinese providers like Moonshot, Baidu, MiniMax, and ByteDance.
 
 ## Features
 
-- 🚀 **Unified API**: Single interface for multiple LLM providers
-- 🔄 **Async Support**: Full async/await support for all operations
+- 🤖 **LLM Chat**: 16 providers for text generation
+- 🎨 **Image Generation**: DALL-E support with more coming
+- 🔢 **Vector Embeddings**: OpenAI embeddings
+- 🚀 **Unified API**: Single interface across all providers
+- 🔄 **Async Support**: Full async/await for all operations
 - 🌊 **Streaming**: Real-time streaming responses
-- 🔌 **Extensible**: Easy to add new providers via adapter pattern
-- 🎯 **Type-Safe**: Full type hints for better IDE support
+- 🔌 **Extensible**: Easy to add new providers
+- 🎯 **Type-Safe**: Complete type hints
 - 🧪 **Well-Tested**: Comprehensive test coverage
-- 🌍 **Global Coverage**: Support for both international and Chinese LLM providers
+- 🌍 **Global Coverage**: International and Chinese providers
 
 ## Supported Providers
 
-| Provider | Chat | Completion | Streaming | List Models | Notes |
-|----------|------|------------|-----------|-------------|-------|
-| OpenAI | ✅ | ✅ | ✅ | ✅ | GPT-4, GPT-3.5, etc. |
-| Anthropic | ✅ | ✅ | ✅ | ✅ | Claude models |
-| Google | ✅ | ✅ | ✅ | ✅ | Gemini models |
-| Moonshot | ✅ | ✅ | ✅ | ✅ | Kimi (月之暗面) |
-| Baidu | ✅ | ✅ | ✅ | ✅ | ERNIE (文心一言) |
-| Mistral | ✅ | ✅ | ✅ | ✅ | Mistral AI models |
-| Groq | ✅ | ✅ | ✅ | ✅ | Ultra-fast inference |
-| Together AI | ✅ | ✅ | ✅ | ✅ | Multi-model platform |
-| Cohere | ✅ | ✅ | ✅ | ✅ | Command models |
-| DeepSeek | ✅ | ✅ | ✅ | ✅ | DeepSeek models |
-| Qwen | ✅ | ✅ | ✅ | ✅ | 通义千问 |
-| Zhipu | ✅ | ✅ | ✅ | ✅ | 智谱 AI |
-| Ollama | ✅ | ✅ | ✅ | ✅ | Local models |
+### 🤖 LLM Chat Providers (16)
+
+| Provider | Chat | Streaming | List Models | Notes |
+|----------|------|-----------|-------------|-------|
+| OpenAI | ✅ | ✅ | ✅ | GPT-4, GPT-3.5, O1 |
+| Anthropic | ✅ | ✅ | ✅ | Claude 3/4 |
+| Google | ✅ | ✅ | ✅ | Gemini |
+| Moonshot | ✅ | ✅ | ✅ | Kimi 128K context |
+| **MiniMax** 🆕 | ✅ | ✅ | ✅ | 海螺AI abab models |
+| **ByteDance** 🆕 | ✅ | ✅ | ✅ | Doubao (豆包/云雀) |
+| **NVIDIA** 🆕 | ✅ | ✅ | ✅ | NIM enterprise API |
+| Baidu | ✅ | ✅ | ✅ | ERNIE (文心一言) |
+| Mistral | ✅ | ✅ | ✅ | Mistral AI |
+| Groq | ✅ | ✅ | ✅ | Ultra-fast (750 tok/s) |
+| Together AI | ✅ | ✅ | ✅ | Multi-model |
+| Cohere | ✅ | ✅ | ✅ | Command R/R+ |
+| DeepSeek | ✅ | ✅ | ✅ | Code + chat |
+| Qwen | ✅ | ✅ | ✅ | 通义千问 |
+| Zhipu | ✅ | ✅ | ✅ | 智谱 GLM |
+| Ollama | ✅ | ✅ | ✅ | Local models |
+
+### 🎨 Image Generation (1)
+
+| Provider | Generate | Edit | Variations |
+|----------|----------|------|------------|
+| OpenAI DALL-E 🆕 | ✅ | ✅ | ✅ |
+
+### 🔢 Vector Embeddings (1)
+
+| Provider | Batch Embed | Single Query |
+|----------|-------------|--------------|
+| OpenAI 🆕 | ✅ | ✅ |
 
 ## Installation
 
@@ -158,6 +178,79 @@ from weav_provider_router import list_models
 
 # List OpenAI models
 models = list_models("openai", api_key="your-api-key")
+print(models)
+
+# List Ollama local models
+models = list_models("ollama", base_url="http://localhost:11434")
+print(models)
+```
+
+### 🎨 Image Generation (NEW!)
+
+```python
+from weav_provider_router import build_image_provider, ImageConfig
+
+# Create image provider
+image_provider = build_image_provider("openai", api_key="your-api-key")
+
+# Generate image
+config = ImageConfig(
+    model="dall-e-3",
+    size="1024x1024",
+    quality="hd",
+    style="vivid"
+)
+
+response = await image_provider.generate(
+    "A serene landscape with mountains and a lake at sunset",
+    config
+)
+print(f"Image URL: {response.url}")
+print(f"Revised prompt: {response.revised_prompt}")
+
+# Edit existing image
+with open("original.png", "rb") as f:
+    image_bytes = f.read()
+
+edited = await image_provider.edit(
+    image=image_bytes,
+    prompt="Add a rainbow in the sky",
+    config=config
+)
+print(f"Edited image: {edited.url}")
+```
+
+### 🔢 Vector Embeddings (NEW!)
+
+```python
+from weav_provider_router import build_embedding_provider, EmbeddingConfig
+
+# Create embedding provider
+embedding_provider = build_embedding_provider("openai", api_key="your-api-key")
+
+# Generate embeddings
+config = EmbeddingConfig(
+    model="text-embedding-3-large",
+    dimensions=1536
+)
+
+texts = [
+    "The quick brown fox jumps over the lazy dog",
+    "Machine learning is a subset of artificial intelligence",
+    "Python is a popular programming language"
+]
+
+embeddings = await embedding_provider.embed(texts, config)
+print(f"Generated {len(embeddings)} embeddings")
+print(f"Embedding dimension: {len(embeddings[0])}")
+
+# Single query embedding
+query_embedding = await embedding_provider.embed_query(
+    "What is AI?",
+    config
+)
+print(f"Query embedding: {len(query_embedding)} dimensions")
+```
 print(models)
 
 # List Ollama local models
@@ -319,6 +412,49 @@ response = chat(
 - Enterprise-focused LLM provider
 - Command R/R+ models
 - Specialized for business applications
+
+#### MiniMax (海螺AI) 🆕
+- Chinese LLM provider
+- Requires both `api_key` and `group_id`
+- abab series models
+
+```python
+from weav_provider_router.providers import build_provider
+
+llm = build_provider(
+    provider="minimax",
+    api_key="your-api-key",
+    group_id="your-group-id"  # Required!
+)
+```
+
+#### ByteDance Doubao (豆包) 🆕
+- ByteDance's LLM service
+- Doubao-pro and Doubao-lite models
+- OpenAI-compatible API
+
+```python
+response = chat(
+    provider="bytedance",
+    api_key="your-api-key",
+    question="写一首诗",
+    model="doubao-pro-32k"
+)
+```
+
+#### NVIDIA NIM 🆕
+- Enterprise GPU-accelerated inference
+- Access to Llama, Mistral, Nemotron models
+- High-performance API
+
+```python
+response = chat(
+    provider="nvidia",
+    api_key="your-nvidia-api-key",
+    question="Explain neural networks",
+    model="nvidia/llama-3.1-nemotron-70b-instruct"
+)
+```
 
 ## API Reference
 

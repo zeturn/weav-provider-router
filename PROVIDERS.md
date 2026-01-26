@@ -11,6 +11,9 @@ Quick reference for all supported LLM providers in weav-provider-router.
 | Google | 🌍 Global | Commercial | API Key | Medium | Medium |
 | Moonshot | 🇨🇳 China | Commercial | API Key | Medium | Medium |
 | Baidu | 🇨🇳 China | Commercial | API Key + Secret | Medium | Low |
+| MiniMax 🆕 | 🇨🇳 China | Commercial | API Key + Group ID | Medium | Low |
+| ByteDance 🆕 | 🇨🇳 China | Commercial | API Key | Fast | Low |
+| NVIDIA 🆕 | 🌍 Global | Enterprise | API Key | Fast | Medium |
 | Mistral | 🇪🇺 Europe | Commercial/OSS | API Key | Fast | Medium |
 | Groq | 🌍 Global | Inference | API Key | Ultra-Fast | Low |
 | Together AI | 🌍 Global | Aggregator | API Key | Fast | Low |
@@ -103,6 +106,76 @@ response = await llm.chat(messages, config)
 **Models**: ernie-4.0-8k, ernie-3.5-8k, ernie-3.5-128k, ernie-speed-128k, ernie-lite-8k, ernie-tiny-8k
 
 **Special**: Uses OAuth authentication (requires both api_key and secret_key)
+
+### MiniMax (海螺AI) 🆕
+
+Chinese LLM provider with abab series models.
+
+```python
+from weav_provider_router.providers import build_provider
+from weav_provider_router.base import CompletionConfig
+
+# Note: MiniMax requires both API key and group ID
+llm = build_provider(
+    provider="minimax",
+    api_key="your-api-key",
+    group_id="your-group-id"  # Required!
+)
+
+config = CompletionConfig(model="abab6.5-chat", temperature=0.7)
+messages = [{"role": "user", "content": "介绍一下人工智能"}]
+response = await llm.chat(messages, config)
+```
+
+**Models**: abab6.5-chat, abab6.5s-chat, abab5.5-chat, abab5.5s-chat
+
+**Special**: Requires both `api_key` and `group_id` for authentication
+
+**Specialty**: Strong Chinese language capabilities
+
+### ByteDance Doubao (豆包) 🆕
+
+ByteDance's LLM service with Doubao and Yunque models.
+
+```python
+response = chat(
+    provider="bytedance",
+    api_key="your-api-key",
+    question="写一首关于春天的诗",
+    model="doubao-pro-32k"
+)
+```
+
+**Models**: 
+- doubao-pro-4k, doubao-pro-32k, doubao-pro-128k
+- doubao-lite-4k, doubao-lite-32k, doubao-lite-128k
+
+**API**: OpenAI-compatible
+
+**Specialty**: Enterprise-grade Chinese LLM, competitive pricing
+
+### NVIDIA NIM 🆕
+
+Enterprise GPU-accelerated inference platform.
+
+```python
+response = chat(
+    provider="nvidia",
+    api_key="your-nvidia-api-key",
+    question="Explain neural networks",
+    model="nvidia/llama-3.1-nemotron-70b-instruct"
+)
+```
+
+**Models**: 
+- nvidia/llama-3.1-nemotron-70b-instruct
+- nvidia/llama-3.1-nemotron-51b-instruct
+- meta/llama-3.1-405b-instruct
+- meta/llama-3.1-70b-instruct
+- mistralai/mixtral-8x7b-instruct-v0.1
+- mistralai/mixtral-8x22b-instruct-v0.1
+
+**Specialty**: High-performance GPU inference, enterprise deployments
 
 ### Mistral AI
 
@@ -275,22 +348,105 @@ async def stream_example():
 asyncio.run(stream_example())
 ```
 
+## Image Generation Providers 🆕
+
+### OpenAI DALL-E
+
+Generate, edit, and create variations of images using DALL-E.
+
+```python
+from weav_provider_router.providers import build_image_provider
+from weav_provider_router.base import ImageConfig
+
+async def generate_image():
+    provider = build_image_provider("openai", api_key="sk-...")
+    
+    # Generate image from text
+    config = ImageConfig(
+        model="dall-e-3",
+        size="1024x1024",
+        quality="hd",
+        style="vivid"
+    )
+    response = await provider.generate(
+        "A serene mountain landscape at sunset",
+        config
+    )
+    print(f"Image URL: {response.url}")
+
+asyncio.run(generate_image())
+```
+
+**Models**: dall-e-3, dall-e-2
+
+**Supported Operations**:
+- `generate()`: Text-to-image generation
+- `edit()`: Image editing with prompt (DALL-E-2 only)
+- `variations()`: Create variations of an image (DALL-E-2 only)
+
+**Sizes**:
+- DALL-E-3: 1024x1024, 1024x1792, 1792x1024
+- DALL-E-2: 256x256, 512x512, 1024x1024
+
+## Vector Embeddings Providers 🆕
+
+### OpenAI Embeddings
+
+Generate vector embeddings for text using OpenAI's embedding models.
+
+```python
+from weav_provider_router.providers import build_embedding_provider
+from weav_provider_router.base import EmbeddingConfig
+
+async def embed_texts():
+    provider = build_embedding_provider("openai", api_key="sk-...")
+    
+    # Batch embedding
+    config = EmbeddingConfig(
+        model="text-embedding-3-large",
+        dimensions=1024  # Optional: reduce dimensions
+    )
+    texts = ["Hello world", "Machine learning", "Vector embeddings"]
+    embeddings = await provider.embed(texts, config)
+    
+    for text, embedding in zip(texts, embeddings):
+        print(f"{text}: {len(embedding)} dimensions")
+    
+    # Single query embedding
+    query_embedding = await provider.embed_query("search query", config)
+
+asyncio.run(embed_texts())
+```
+
+**Models**: 
+- text-embedding-3-large (3072 dimensions, best quality)
+- text-embedding-3-small (1536 dimensions, faster)
+- text-embedding-ada-002 (1536 dimensions, legacy)
+
+**Dimensions**: Supports custom dimension reduction via `dimensions` parameter
+
+**Use Cases**: Semantic search, RAG, clustering, similarity matching
+
 ## Provider Selection Guide
 
 ### Choose Based on Use Case
 
 **🚀 Speed Priority**
 - **Groq**: 750+ tokens/sec, ultra-fast
+- **ByteDance**: Fast inference, competitive latency 🆕
+- **NVIDIA**: GPU-accelerated, enterprise-grade 🆕
 - **Ollama**: Local, no network latency
 - **Mistral**: Fast European servers
 
 **💰 Cost Optimization**
 - **Ollama**: Free (local)
-- **DeepSeek/Qwen/Zhipu**: Low-cost Chinese providers
+- **DeepSeek/Qwen/Zhipu/MiniMax/ByteDance**: Low-cost Chinese providers 🆕
 - **Together AI**: Competitive pricing
 - **Groq**: Low cost per token
 
 **🌍 Chinese Language**
+- **MiniMax (海螺AI)**: Strong Chinese capabilities 🆕
+- **ByteDance Doubao**: Enterprise Chinese 🆕
 - **Moonshot**: Long-context Chinese
 - **Baidu ERNIE**: Enterprise Chinese
 - **Qwen**: Alibaba multilingual
@@ -306,6 +462,8 @@ asyncio.run(stream_example())
 - **Claude 3**: Up to 200K tokens
 
 **💼 Enterprise**
+- **NVIDIA NIM**: GPU-accelerated enterprise deployments 🆕
+- **ByteDance**: Enterprise-grade Chinese LLM 🆕
 - **Cohere**: Business-optimized
 - **Anthropic Claude**: Safety-focused
 - **OpenAI**: Industry standard
@@ -315,6 +473,12 @@ asyncio.run(stream_example())
 - **DeepSeek**: Strong coding model
 - **OpenAI GPT-4**: Excellent code gen
 - **Ollama**: Local testing
+
+**🎨 Image Generation**
+- **OpenAI DALL-E**: Text-to-image, editing, variations 🆕
+
+**🔍 Vector Embeddings**
+- **OpenAI Embeddings**: Semantic search, RAG applications 🆕
 
 ## Dependencies
 
@@ -342,6 +506,9 @@ pip install weav-provider-router[all]
 - **Google**: https://makersuite.google.com/app/apikey
 - **Moonshot**: https://platform.moonshot.cn/console/api-keys
 - **Baidu**: https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application
+- **MiniMax**: https://platform.minimaxi.com/user-center/basic-information/interface-key 🆕
+- **ByteDance**: https://console.volcengine.com/ark 🆕
+- **NVIDIA**: https://build.nvidia.com/ 🆕
 - **Mistral**: https://console.mistral.ai/
 - **Groq**: https://console.groq.com/keys
 - **Together AI**: https://api.together.xyz/settings/api-keys
@@ -376,6 +543,12 @@ pip install httpx
 
 ```python
 llm = build_provider("baidu", api_key="...", secret_key="...")
+```
+
+**MiniMax Special Case**: Requires both api_key AND group_id:
+
+```python
+llm = build_provider("minimax", api_key="...", group_id="...")
 ```
 
 ### Rate Limits
